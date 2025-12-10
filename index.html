@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OM Presentation - Governance Toolkit</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ops: {
+                red: '#C8102E',     // The primary deep red from the PDF
+                dark: '#111827',    // Deep gray/black for text
+                light: '#F3F4F6',   // Light gray background
+                white: '#FFFFFF',
+                card: '#B91C1C'     // Slightly darker red for card depth
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              heading: ['Poppins', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      body {
+        background-color: #FFFFFF;
+        color: #111827;
+        overflow: hidden; 
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #F3F4F6; }
+      ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #C8102E; }
+      
+      /* Utilities */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .slide-content {
+          animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="typescript,react">
+        const { useState, useEffect, useCallback } = React;
+
+        // ==========================================
+        // TYPES & HELPERS
+        // ==========================================
+        const Section = {
+            THEORY: 'Toolkit',
+            PRACTICE: 'Simulator',
+        };
+
+        const H = ({ children }) => <span className="text-ops-red font-bold">{children}</span>;
+
+        // ==========================================
+        // COMPONENTS: SIMULATOR
+        // ==========================================
+        const Simulator = () => {
+            const [specificity, setSpecificity] = useState('Low');
+            const [ambiguity, setAmbiguity] = useState('Low');
+            const [capability, setCapability] = useState('Supplier');
+            const [recommendation, setRecommendation] = useState({ mode: '', reason: '' });
+
+            useEffect(() => {
+                let mode = '';
+                let reason = '';
+
+                if (specificity === 'High') {
+                    mode = 'CONTROLLED';
+                    reason = 'High specific investments create lock-in risk. You must control the transaction to prevent opportunism.';
+                } else {
+                    if (ambiguity === 'High') {
+                        if (capability === 'Buyer') {
+                            mode = 'CONTROLLED';
+                            reason = 'Performance is hard to measure, but you have the internal skills to ensure quality better than the market.';
+                        } else {
+                            mode = 'HYBRID';
+                            reason = 'Performance is hard to measure and the supplier knows better. Use Hybrid governance to collaborate while maintaining visibility.';
+                        }
+                    } else {
+                        if (capability === 'Supplier') {
+                            mode = 'DELEGATED';
+                            reason = 'Low risk and the supplier is the expert. Save transaction costs and delegate to the market.';
+                        } else {
+                            mode = 'DELEGATED';
+                            reason = 'Routine transaction. Even if you are capable, market governance is more efficient for standard goods.';
+                        }
+                    }
+                }
+
+                setRecommendation({ mode, reason });
+            }, [specificity, ambiguity, capability]);
+
+            // Styling for buttons: clean white with gray border, turning Red when active
+            const btnClass = (active) => 
+                `px-6 py-3 text-sm font-semibold rounded-lg shadow-sm transition-all duration-300 border ${
+                active 
+                    ? 'bg-ops-red text-white border-ops-red shadow-md transform scale-105' 
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-ops-red hover:text-ops-red'
+                }`;
+
+            return (
+                <div className="flex flex-col lg:flex-row gap-12 w-full h-full items-center justify-center p-4">
+                    {/* INPUTS PANEL */}
+                    <div className="flex-1 space-y-10 w-full max-w-lg">
+                        <div className="space-y-4">
+                            <label className="text-ops-dark font-heading font-bold text-lg flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-full bg-ops-red text-white flex items-center justify-center text-sm">1</span>
+                                Asset Specificity
+                            </label>
+                            <p className="text-sm text-gray-500">Have you made unique investments for this supplier?</p>
+                            <div className="flex gap-3">
+                                {['Low', 'Medium', 'High'].map((val) => (
+                                <button key={val} onClick={() => setSpecificity(val)} className={`flex-1 ${btnClass(specificity === val)}`}>{val}</button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <label className="text-ops-dark font-heading font-bold text-lg flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-full bg-ops-red text-white flex items-center justify-center text-sm">2</span>
+                                Performance Ambiguity
+                            </label>
+                            <p className="text-sm text-gray-500">Is it difficult to measure quality/output accurately?</p>
+                            <div className="flex gap-3">
+                                {['Low', 'High'].map((val) => (
+                                <button key={val} onClick={() => setAmbiguity(val)} className={`flex-1 ${btnClass(ambiguity === val)}`}>{val}</button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-ops-dark font-heading font-bold text-lg flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-full bg-ops-red text-white flex items-center justify-center text-sm">3</span>
+                                Sourcing Capability
+                            </label>
+                            <p className="text-sm text-gray-500">Who is better at managing this specific supply base?</p>
+                            <div className="flex gap-3">
+                                <button onClick={() => setCapability('Buyer')} className={`flex-1 ${btnClass(capability === 'Buyer')}`}>We Are (Buyer)</button>
+                                <button onClick={() => setCapability('Supplier')} className={`flex-1 ${btnClass(capability === 'Supplier')}`}>Tier 1 Supplier</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* OUTPUT PANEL */}
+                    <div className="flex-1 w-full max-w-lg">
+                        <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:border-ops-red/20 transition-colors duration-500">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-ops-red"></div>
+                            
+                            <h3 className="text-gray-400 font-bold uppercase tracking-widest text-sm mb-4">Recommended Governance Mode</h3>
+                            
+                            <div className="text-5xl lg:text-6xl font-heading font-bold text-ops-red mb-6 tracking-tight">
+                                {recommendation.mode}
+                            </div>
+                            
+                            <div className="w-16 h-1 bg-gray-200 mb-6 rounded-full"></div>
+                            
+                            <p className="text-lg leading-relaxed text-gray-700 font-medium">
+                                {recommendation.reason}
+                            </p>
+
+                            {/* Decorative Icon Background */}
+                            <div className="absolute -bottom-8 -right-8 opacity-5">
+                                <svg className="w-64 h-64" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // COMPONENTS: CARDS
+        // ==========================================
+        const PlaybookCard = ({ title, when, detail }) => {
+            return (
+                <div className="flex flex-col h-full bg-ops-red text-white rounded-3xl overflow-hidden shadow-2xl relative group hover:-translate-y-1 transition-transform duration-300">
+                    {/* Top Section */}
+                    <div className="p-8 flex-1 relative z-10">
+                        <div className="w-12 h-12 mb-6 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-heading font-bold uppercase mb-4 tracking-wide">{title}</h3>
+                        
+                        <div className="mb-2 text-xs font-bold uppercase text-white/60 tracking-widest">Use This When</div>
+                        <p className="text-lg font-medium leading-snug mb-6 text-white/90">{when}</p>
+                        
+                        <div className="w-full h-px bg-white/20 mb-6"></div>
+                        
+                        <p className="text-sm text-white/80 leading-relaxed font-light">
+                            {detail}
+                        </p>
+                    </div>
+
+                    {/* Decorative Bottom - Simulated Image Look */}
+                    <div className="h-32 bg-gradient-to-t from-black/40 to-transparent relative">
+                         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+                         {/* Abstract Pattern overlay */}
+                         <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '10px 10px'}}></div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // SLIDES DATA
+        // ==========================================
+        const SLIDES = [
+            {
+                id: 1,
+                section: Section.THEORY,
+                title: "Governance Toolkit",
+                subtitle: "For Modern Supply Chains",
+                layout: 'grid',
+                content: (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full items-stretch">
+                    <PlaybookCard 
+                        title="Directed Sourcing"
+                        when="High Specificity + You are Capable"
+                        detail="The buyer has made specific investments in a lower-tier supplier. Performance is hard to measure, but the buyer has strong internal monitoring capabilities."
+                    />
+                    <PlaybookCard 
+                        title="Hybrid Governance"
+                        when="High Ambiguity + Need Visibility"
+                        detail="The buyer needs some visibility & influence to manage risk, but still relies on the Tier 1 supplier's superior sourcing expertise and networks."
+                    />
+                    <PlaybookCard 
+                        title="Delegated Sourcing"
+                        when="Standard Goods + Tier 1 Expert"
+                        detail="The item is a commodity or the Tier 1 supplier is the clear expert. Hand off the responsibility to save costs. Focus your energy elsewhere."
+                    />
+                </div>
+                ),
+                takeaway: "One size does not fit all. Match the mode to the transaction."
+            },
+            {
+                id: 2,
+                section: Section.PRACTICE,
+                title: "Decision Simulator",
+                subtitle: "Apply the Logic",
+                layout: 'simulator',
+                content: <Simulator />, 
+                takeaway: "Test the framework logic in real-time."
+            }
+        ];
+
+        // ==========================================
+        // MAIN APP COMPONENT
+        // ==========================================
+        const App = () => {
+            const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
+            const [isFullscreen, setIsFullscreen] = useState(false);
+
+            const currentSlide = SLIDES[currentSlideIdx];
+            const progress = ((currentSlideIdx + 1) / SLIDES.length) * 100;
+
+            const nextSlide = useCallback(() => {
+                setCurrentSlideIdx((prev) => Math.min(prev + 1, SLIDES.length - 1));
+            }, []);
+
+            const prevSlide = useCallback(() => {
+                setCurrentSlideIdx((prev) => Math.max(prev - 1, 0));
+            }, []);
+
+            const toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    setIsFullscreen(true);
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        setIsFullscreen(false);
+                    }
+                }
+            };
+
+            useEffect(() => {
+                const handleFullscreenChange = () => {
+                    setIsFullscreen(!!document.fullscreenElement);
+                };
+                document.addEventListener('fullscreenchange', handleFullscreenChange);
+                return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            }, []);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [nextSlide, prevSlide]);
+
+            const goToSlide = (idx) => {
+                setCurrentSlideIdx(idx);
+            };
+
+            const uniqueSections = Array.from(new Set(SLIDES.map(s => s.section)));
+            
+            return (
+                <div className="w-screen h-screen bg-white text-ops-dark flex flex-col font-sans selection:bg-ops-red selection:text-white">
+                
+                {/* Top Navigation Bar */}
+                <div className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+                    <div className="h-1.5 w-full bg-gray-100">
+                        <div 
+                            className="h-full bg-ops-red transition-all duration-500 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                    
+                    <div className="flex justify-between items-center px-6 py-4 md:px-12">
+                        {/* Section Tabs */}
+                        <div className="flex gap-4">
+                            {uniqueSections.map((sec) => {
+                                const firstSlideOfSec = SLIDES.findIndex(s => s.section === sec);
+                                const isActive = currentSlide.section === sec;
+                                return (
+                                    <button 
+                                    key={sec}
+                                    onClick={() => goToSlide(firstSlideOfSec)}
+                                    className={`
+                                        text-sm font-heading font-bold uppercase tracking-widest transition-colors duration-300
+                                        ${isActive 
+                                        ? 'text-ops-red' 
+                                        : 'text-gray-400 hover:text-gray-600'
+                                        }
+                                    `}
+                                    >
+                                    {sec}
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        {/* Controls / Info */}
+                        <div className="flex items-center gap-6">
+                            <div className="text-sm font-bold text-gray-400 font-heading tracking-widest">
+                                <span className="text-ops-dark">{currentSlideIdx + 1}</span> / {SLIDES.length}
+                            </div>
+                            <button onClick={toggleFullscreen} className="text-gray-400 hover:text-ops-red transition-colors" title="Toggle Fullscreen">
+                                {isFullscreen ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content Area */}
+                <main className="flex-1 flex flex-col relative pt-24 pb-16">
+                    <div key={currentSlide.id} className="slide-content flex-1 flex flex-col px-6 md:px-12 max-w-7xl mx-auto w-full">
+                    
+                    {/* Slide Header */}
+                    <div className="mb-8 md:mb-12 text-center md:text-left">
+                        <h1 className="text-4xl md:text-6xl font-heading font-bold text-ops-red leading-tight mb-2">
+                            {currentSlide.title}
+                        </h1>
+                        {currentSlide.subtitle && (
+                             <h2 className="text-xl md:text-2xl text-gray-500 font-medium">
+                                {currentSlide.subtitle}
+                            </h2>
+                        )}
+                    </div>
+
+                    {/* Content Wrapper */}
+                    <div className="flex-1 min-h-0">
+                        {currentSlide.content}
+                    </div>
+
+                    </div>
+                </main>
+
+                {/* Bottom Bar / Takeaway */}
+                <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 py-4 px-6 md:px-12 z-40">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between">
+                         <div className="flex items-center gap-4">
+                            <div className="w-2 h-2 rounded-full bg-ops-red animate-pulse"></div>
+                            <p className="text-sm font-medium text-gray-600">
+                                <span className="uppercase text-xs font-bold text-ops-red tracking-wider mr-2">Key Takeaway:</span>
+                                {currentSlide.takeaway}
+                            </p>
+                        </div>
+                        
+                        {/* Navigation Arrows */}
+                        <div className="flex gap-2">
+                             <button 
+                                onClick={prevSlide}
+                                disabled={currentSlideIdx === 0}
+                                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-ops-dark"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button 
+                                onClick={nextSlide}
+                                disabled={currentSlideIdx === SLIDES.length - 1}
+                                className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-ops-dark"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
